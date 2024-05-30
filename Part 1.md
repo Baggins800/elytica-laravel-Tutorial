@@ -40,11 +40,11 @@ composer require elytica/elytica-socialite
 php artisan vendor:publish --provider=Elytica\Socialite\ElyticaServiceProvider
 php artisan migrate
 ```
-In `resources/views/welcome.blade.php` can add:
+In `resources/views/welcome.blade.php` you can add:
 ```
 <a class="ms-3" href="{{ route('elytica_service.auth') }}">                         
     {{ __('Log in') }}                                                              
-</a>   
+</a> 
 ```
 and in your `.env`:
 ```
