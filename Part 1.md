@@ -1,7 +1,7 @@
 # elytica-laravel-Tutorial Part 1
 Diet problem with Laravel Filament and elytica
 
-# Getting started
+## Getting started
 To make life easier install:
 * On Windows --> [Herd](https://herd.laravel.com/windows)
 * On MacOS --> [Herd](https://herd.laravel.com/)
