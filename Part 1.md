@@ -7,7 +7,7 @@ To make life easier install:
 * On MacOS --> [Herd](https://herd.laravel.com/)
 
 This should configure `PHP`, `Nginx` and you should be able to use `composer` from the terminal.<br>
-Open a new terminal or PowerShell, and `cd <path>` to the `<path>` you want you projects.
+Open a new terminal or PowerShell, and `cd <path>` to the `<path>` you want your projects.
 Now run:
 ```
 herd park
