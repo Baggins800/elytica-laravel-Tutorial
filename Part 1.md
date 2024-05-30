@@ -61,8 +61,14 @@ http://diet-app.test/auth/callback
 
 Update `ELYTICA_SEVICE_*` in the `.env` with the created client.
 
-After this, add the following routes in `routes/auth.php`:
+After this, add the following routes in `routes/web.php`:
 ```
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
+use App\Models\User;
+use Illuminate\Support\Facades\Auth;
+use Laravel\Socialite\Facades\Socialite;
+
 Route::middleware('guest')->group(function () {
     Route::get('/auth/redirect', function () {
         return Socialite::driver('elytica_service')->redirect();
