@@ -52,10 +52,12 @@ ELYTICA_SERVICE_CLIENT_ID=
 ELYTICA_SERVICE_CLIENT_SECRET=
 ELYTICA_SERVICE_REDIRECT_URI=
 ```
-To generate the following, you need to have a developer role with you elytica account, this can be achieved by sending an email to `info@elytica.com`.
+To generate the following, you need to have a developer role with your elytica account, this can be achieved by sending an email to `info@elytica.com`.
 Go to `Tokens->Create New Client->Create an OAuth Client`, and fill in the details.
 The redirect details will be:
-* http://diet-app.test/auth/callback
+```
+http://diet-app.test/auth/callback
+```
 This will allow you to create a third party client.
 
 After this, add the following routes in `routes/auth.php`:
