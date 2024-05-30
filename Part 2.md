@@ -1,4 +1,4 @@
-# elytica-laravel-Tutorial Part 2
+# elytica-laravel Tutorial Part 2 - Multi-Tenant Data Entry
 
 We will be using Laravel Filament to generate a new panel and create models.
 
