@@ -58,7 +58,8 @@ The redirect details will be:
 ```
 http://diet-app.test/auth/callback
 ```
-This will allow you to create a third party client.
+
+Update `ELYTICA_SEVICE_*` in the `.env` with the created client.
 
 After this, add the following routes in `routes/auth.php`:
 ```
