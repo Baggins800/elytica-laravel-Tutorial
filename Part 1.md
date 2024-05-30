@@ -31,7 +31,7 @@ php artisan filament:install --panels
 Create a new panel with ID `diet-app`, you should be able to access the panel with [diet-app.test/diet-app](http://diet-app.test/diet-app)
 
 ### Disable the login and use elytica as login options
-Let's disable the login of filament, using:<br>
+Let's disable the login of filament:<br>
 Remove `->login()` in `app/Providers/Filament/DietAppPanelProvider.php`
 Install socialite and the elytica socialite package
 ```
