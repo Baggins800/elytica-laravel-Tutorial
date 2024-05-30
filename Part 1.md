@@ -1,4 +1,4 @@
-# elytica-laravel-Tutorial Part 1
+# elytica-laravel Tutorial Part 1 - elytica Auth
 Diet problem with Laravel Filament and elytica
 
 ## Getting started
