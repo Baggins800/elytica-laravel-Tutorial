@@ -26,6 +26,7 @@ You should be able to see you application [diet-app.test](http://diet-app.test)
 ### Installing a default panel
 Run:
 ```
+composer require filament/forms
 php artisan filament:install --panels
 ```
 Create a new panel with ID `diet-app`, you should be able to access the panel with [diet-app.test/diet-app](http://diet-app.test/diet-app)
