@@ -131,7 +131,12 @@ Here we need to create a table that holds the data for our food and the system n
 ```
 php artisan make:model FoodNutrition -m
 ```
-with the fields in the migration as:
+with the fields in the migration:
+
+```
+database/migrations/xxxx_xx_xx_yyyyyyyy_create_food_nutrition_table.php
+```
+as
 ```
             $table->foreignIdFor(Food::class);                            
             $table->foreignIdFor(Nutrition::class);
