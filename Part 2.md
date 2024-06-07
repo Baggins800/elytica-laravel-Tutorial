@@ -138,8 +138,8 @@ database/migrations/xxxx_xx_xx_yyyyyyyy_create_food_nutrition_table.php
 ```
 as
 ```
-            $table->foreignIdFor(Food::class);                            
-            $table->foreignIdFor(Nutrition::class);
+            $table->foreignIdFor(App\Models\Food::class);                            
+            $table->foreignIdFor(App\Models\Nutrition::class);
             $table->double(column: 'value');     
 ``` 
 We can now define the relationships and assignable attributes in the `FoodNutrition` model:
