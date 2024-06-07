@@ -188,6 +188,7 @@ We can also filter the options from the form() function in app/Filament/Resource
                         return $query->where('user_id', Auth::id());
                     })
 ```
+* Note: `->relationship('food'...` - food refers to the FoodNutrition model's `food()` belongs to function.
 This should work, but we want to see the unit of the selected nutrition. We can add a derived field in the Nutrition model using:
 
 ```
