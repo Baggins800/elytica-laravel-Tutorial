@@ -34,9 +34,9 @@ Let's populate the nutrition data using a seeder:
 php artisan make:seeder NutritionSeeder
 ```
 In database/seeders/NutritionSeeder.php, we can add some seed values for our system:
-
 ```
-        DB::table('nutrition')->insert([
+        
+        Illuminate\Support\Facades\DB::table('nutrition')->insert([
             ['name' => 'Calories', 'unit' => 'kcal'],
             ['name' => 'Protein', 'unit' => 'g'],
             ['name' => 'Fat', 'unit' => 'g'],
@@ -65,7 +65,7 @@ Each user should be able to define their own list of food, including cost, name,
 ```
     $table->string('name');
     $table->double('unit_cost');
-    $table->foreignIdFor(model: User::class);
+    $table->foreignIdFor(model: App\Models\User::class);
 ```
 As a user, we need a place to define our food. Here we can create a Filament resource:
 
