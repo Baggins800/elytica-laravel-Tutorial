@@ -156,6 +156,7 @@ We can now define the relationships and assignable attributes in the `FoodNutrit
         return $this->belongsTo(Nutrition::class);
     }
 ```
+Remember to include `use Illuminate\Database\Eloquent\Relations\BelongsTo;`.
 
 We can add this model as a Filament resource as well:
 ```
