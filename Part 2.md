@@ -19,6 +19,15 @@ and add the following fields:
     $table->string('unit');  
 ```
 
+You can run 
+```
+php artisan migrate
+```
+to create the table and 
+```
+php artisan db:table nutrition
+```
+to see the table structure.
 Let's populate the nutrition data using a seeder:
 
 ```
