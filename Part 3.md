@@ -74,10 +74,36 @@ Lets start by creating a model, migration and a filament resource as we did in t
 ```
 php artisan make:model Profile -m
 ```
-add the following fields to `database/migrations/xxxx_xx_xx_xxxxxx_create_profiles_table.php` and run `php artisan migrate` afterwards:
+Add the following fields to `database/migrations/xxxx_xx_xx_xxxxxx_create_profiles_table.php` and run `php artisan migrate` afterwards:
 ```
-            $table->foreignId(User::class);
+            $table->foreignIdFor(User::class);
             $table->unsignedBigInteger(column: 'elytica_job_id')->nullable();
             $table->string(column: 'name');
 ```
+Create a filament resource:
+```
+php artisan make:filament-resource Profile --generate
+```
+Once again you can remove:
+```
+                Forms\Components\TextInput::make('user_id')
+                    ->required()
+                    ->numeric(),
 
+```
+from `form(...)` in `app/Filament/Resources/ProfileResource.php` and add the folling in `app/Models/Profile.php`:
+```
+    protected $guarded = ['user_id'];
+    protected static function boot()
+    {
+        parent::boot();
+        static::creating(function ($profile) {
+            $profile->user_id = auth()->id();
+        });
+        static::updating(function ($profile) {
+            if ($profile->isDirty('user_id')) {
+                $profile->user_id = auth()->id();
+            }
+        });
+    }
+```
