@@ -69,3 +69,15 @@ You can see this "run" as an optimization run for a specific person, e.g.
 > **Note:** These values are based on general dietary guidelines and can vary based on individual health conditions, lifestyle factors, and nutritional requirements. For personalized dietary advice, consult a healthcare professional or dietitian.
 
 In our case we want to create a table to hold individual health conditions / profiles, lets call the model `Profile` so the relating table will be `profiles`. This table will ha a foreign key to the `users` table, a `name` and an `elytica_job_id`.
+You can see each `Profile` as an optimization run, given nutritional constraints assosiated with the profile.
+Lets start by creating a model, migration and a filament resource as we did in the previous tutorials:
+```
+php artisan make:model Profile -m
+```
+add the following fields to `database/migrations/xxxx_xx_xx_xxxxxx_create_profiles_table.php` and run `php artisan migrate` afterwards:
+```
+            $table->foreignId(User::class);
+            $table->unsignedBigInteger(column: 'elytica_job_id')->nullable();
+            $table->string(column: 'name');
+```
+
