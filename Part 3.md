@@ -159,3 +159,50 @@ public function initializeService(string $token): ?ComputeService { // <--- noti
 
 ```
 Here we can use the token from `auth()->user()->elytica_service_token` - in the case you encrypted the token, you need to decrypt in before passing it to the `ComputeService` constructor.
+To create a project add the following helper function:
+```
+    public function createOrUpdateProject(ComputeService $computeService, int|null $project_id): int|null {
+        $applications = $computeService->getApplications();
+        $appId = config('app.elytica_app_id');
+        $appExists = array_filter($applications, fn($v) => $v->id == $appId);
+
+        if (empty($appExists)) {
+            return null;
+        }
+
+        $projects = $computeService->getProjects();
+        if (!in_array($project_id, array_column($projects, 'id'))) {
+            $project_id = $computeService->createNewProject(
+                'Diet Problem',
+                config('app.name'),
+                $appId,
+                config('app.url') . "/webhook",
+                config('webhook-client.configs.0.signing_secret')
+            )?->id;
+        } else {
+            $computeService->updateProject(
+                $project_id,
+                config('app.url') . "/webhook",
+                config('webhook-client.configs.0.signing_secret')
+            );
+        }
+
+        return $project_id;
+    }
+```
+
+Initially, this function retrieves all applications that the Elytica user has access to. These applications include the MIP interpreter with Python or LUA, as well as various solvers such as HiGHS, SCIP, or CLP/CBC. Within our `config/app.php` configuration file, we can specify our preferred application and verify whether the user has access to it, particularly for commercial solvers or custom applications:
+```
+    /*
+    |--------------------------------------------------------------------------
+    | elytica Application
+    |--------------------------------------------------------------------------
+    | This is the elytica application ID, it is used to identify a
+    | compute application, such as MIP Interpreter with Python and HiGHS.
+    | For your usecase, make sure use select the correct application, e.g.
+    | Simulation is ID 31, and MIP Interpreter with Python and HiGHS is 14.
+    |
+    */
+    'elytica_app_id' => env('ELYTICA_APP_ID', 14),
+
+```
