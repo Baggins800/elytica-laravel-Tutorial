@@ -148,9 +148,9 @@ Lets create a helper function in our service to initialize our compute server (`
 ```
 and within the class:
 ```
-  public function initializeService(string $token): array {
+public function initializeService(string $token): ?ComputeService { // <--- notice this type it is the same as null|ComputeService (php has union type support)
     if (!$token) {
-      return null;
+        return null;
     }
     // handle token decryption here if needed
     // handle refresh token here before returning new ComputeService (not in this tutorial)
