@@ -259,3 +259,61 @@ In your filament profile resource - `app/Filament/Resources/ProfileResource.php`
 Notice the elegance of the builder pattern with a fluent interface used in the `table(...)` and `form(...)` functions' returns more about the builder pattern here. When you press queue on the profile, it should create a project on the Elytica service (no jobs or files are uploaded yet). Next, we want to create a job, and perhaps upload a file containing the model, followed by the data.
 
 In our `ElyticaService` class, we can add helper functions: one for creating a job, one for uploading the data and model, and later another for retrieving the results. As you can imagine, the model is available to the Elytica user since the computation is run from their account. If you want to hide the model, you should approach project and job creation differently. For instance, you could use your own account and pass the token from your .env file. This method contains the computation within your account but does so at the expense of your account's computational resources.
+
+Let's create a `createJob` function for our service:
+```
+  public function createJob(ComputeService $computeService, int $project_id, Profile $profile)
+  {
+      $jobs = array_filter($computeService->getJobs($project_id), fn ($v) => $v->id == $profile->elytica_job_id);
+      if (count($jobs) == 0) {
+          return $computeService->createNewJob($project_id, "$profile->id");
+      }
+      return reset($jobs); // <--- this is a more elegant way than $jobs[0], reset() rewinds array's internal pointer to the first element and returns the value of the first array element.
+  }
+```
+Now we can call the `createJob` function in out `QueueAction` class within out action function (`app/Filament/Actions/QueueAction.php`):
+```
+            $job = $service->createJob($compute, $project_id, $record);
+            $record->elytica_job_id = $job->id;
+            $record->save();
+```
+When you press queue now, there should be a job created for the project, you can view the project and job from [here](https://compute.elytica.com). There is no script assigned to the job, so let's create a new file that will be uploaded for that job, create a new file in `app/Services/file.hlpl` with the following content:
+```
+def main():
+  print("Hello World")
+  return  0
+```
+and create functions to upload the data and job script:
+```
+    public function collectData($job): Collection
+    {
+        return collect([]); // we will collect the correct data here later
+    }
+    public function uploadData(ComputeService|null $computeService, int|null $project_id, $job): array
+    {
+        if ($project_id === null || $computeService === null) {
+            return [false, "Elytica project not used."];
+        }
+
+        $data = $computeService->uploadInputFile(
+            "data.json",
+            json_encode($this->collectData($job)),
+            $project_id
+        )?->newfiles;
+
+        $script = $computeService->uploadInputFile(
+            "$job->id.hlpl",
+            file_get_contents(base_path('app/Services/file.hlpl')),
+            $project_id
+        )?->newfiles;
+
+        if (!($data && $script)) {
+            return [false, "Failed to upload files."];
+        }
+
+        $computeService->assignFileToJob($project_id, $job->id, $script[0]->id, 1);
+        $computeService->assignFileToJob($project_id, $job->id, $data[0]->id, 2);
+
+        return [true, "Success. You can now queue the job."];
+    }
+```
