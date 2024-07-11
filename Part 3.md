@@ -172,6 +172,7 @@ use Filament\Actions\Concerns\CanCustomizeProcess;
 use Filament\Notifications\Notification;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\User;
 
 class QueueAction extends Action
 {
@@ -194,6 +195,7 @@ class QueueAction extends Action
               auth()->user()->elytica_service_token
             );
             $project_id = $service->createOrUpdateProject($compute, auth()->user()->elytica_project_id);
+            User::find(auth()->id())->update(['elytica_project_id' => $project_id]);
             Notification::make()
                 ->title("Queuing $record->name")
                 ->success()
@@ -355,3 +357,80 @@ We need to filter the profiles, such that a user can only see their own profiles
                         return $query->where('user_id', auth()->id());
                     })
 ```
+and in the `table(...)`:
+```
+...
+        return $table->modifyQueryUsing(fn (Builder $query) =>
+               $query->whereIn('profile_id', function ($subquery) {
+                   $subquery->select('id')
+                            ->from('profiles')
+                            ->where('user_id', auth()->id());
+               })
+            )->columns([
+...
+```
+We should be ready to collect the data in the `ElyticaService` class (`app/Services/ElyticaService.php`):
+```
+    public function collectData($job): Collection
+    {
+        $profile = Profile::whereElyticaJobId($job?->id)->first();
+        $food = Food::whereUserId($profile->user_id);
+        return collect([
+          'nutrition_profiles' => NutritionProfile::whereProfileId($profile?->id)->get(),
+          'nutrition' => Nutrition::all(),
+          'food' => $food->get(),
+          'food_nutrition' => FoodNutrition::whereIn('food_id', $food->pluck('id'))->get()
+        ]);
+    }
+```
+We can update our script to solve the diet problem:
+```
+model diet_problem
+  set N = load_nutrition()
+  set F = load_food()
+  const U = load_nutrition_max(), forall i in N
+  const L = load_nutrition_min(), forall i in N
+  const c = load_food_cost(), forall j in F
+  const v = load_food_nutrients(), forall i in N, forall j in F
+  var 0 <= x <= infty, forall j in F
+  min sum_{j in F}{ c_{j}*x_{j} }
+  constr sum_{j in F}{ v_{i,j}*x_{j} } <= U_{i}, forall i in N
+  constr sum_{j in F}{ v_{i,j}*x_{j} } >= L_{i}, forall i in N
+end
+
+import elytica
+import json
+
+with open('data.json', 'r') as f:
+  data = json.load(f)
+
+load_food = lambda: [i['id'] for i in data["food"]]
+load_nutrition = lambda: [i['id'] for i in data["nutrition"]]
+load_nutrition_max = lambda: {i['nutrition_id']:i['maximum'] for i in data["nutrition_profiles"]}
+load_nutrition_min = lambda: {i['nutrition_id']:i['minimum'] for i in data["nutrition_profiles"]}
+load_food_cost = lambda: {i['id']:i['unit_cost'] for i in data["food"]}
+
+load_food_nutrients = lambda: {f['id']:{ n['nutrition_id']: n['value'] for n in data['food_nutrition'] if n['food_id'] == f['id']} for f in data["food"]}
+def main():
+  #print(load_food())
+  #print(load_nutrition())
+  #print(load_nutrition_max())
+  #print(load_nutrition_min())
+  #print(load_food_cost())
+  #print(load_food_nutrients())
+  elytica.init_model("diet_problem")
+  status = elytica.run_model("diet_problem")      
+  if status == "FEASIBLE" or status == "OPTIMAL":
+    F = elytica.get_model_set("diet_problem", "F")    
+    for j in F:
+      val = elytica.get_variable_value("diet_problem", f"x{j}")
+      if val > 0 :
+        row = {}
+        row["food_id"] = j
+        row["value"] = val
+        solution.append(row)                   
+    result={'solution': solution}
+    elytica.write_results(json.dumps(result)) 
+  return 0
+```
+More details on the diet problem can be found [here](https://blog.elytica.com/2020/11/10/tutorial-9-working-with-json-file-formats-diet-problem/).
