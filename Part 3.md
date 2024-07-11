@@ -108,3 +108,23 @@ from `form(...)` in `app/Filament/Resources/ProfileResource.php` and add the fol
     }
 ```
 There is no need for us to see `elytica_job_id` in the form or table view of filament, but for now we will leave it in to do debugging.
+We can not yet run an elytica job, since there is no elytica project created, so lets start with creating a project and storing the project id. We need to add a `elytica_project_id` field to the user:
+```
+php artisan make:migration add_field_to_users_table
+```
+having the command in this form, automagically creates an empty migration for the `users` table, now we can add the field in `database/migrations/xxxx_xx_xx_xxxxxx_add_field_to_users_table.php` and run `php artisan migrate`:
+```
+    public function up(): void
+    {
+        Schema::table('users', function (Blueprint $table) {
+            $table->unsignedBigInteger(column: 'elytica_project_id')->nullable();
+        });
+    }
+    public function down(): void
+    {
+        Schema::table('users', function (Blueprint $table) {
+            $table->dropColumn(columns: ['elytica_project_id']); /// <--- this is for php artisan migrate:rollback
+        });
+    }
+```
+We make the `elytica_project_id` nullable since we may not know if it exists.
