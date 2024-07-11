@@ -68,6 +68,8 @@ Each user should be able to define their own list of food, including cost, name,
     $table->double('unit_cost');
     $table->foreignIdFor(model: App\Models\User::class);
 ```
+After adding fields to the migration, remember to run `php artisan migrate` to create the table and fields.
+In a production system with active users, you should never change historically created migrations but adding fields, you should instead create a new migration with `php artisan make:migration add_fields_to_sometablename_table`.
 As a user, we need a place to define our food. Here we can create a Filament resource:
 
 ```
