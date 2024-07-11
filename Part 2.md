@@ -60,6 +60,7 @@ Let's move on to the food.
 php artisan make:model -m Food
 ```
 This will create a migration for the food table along with the object-relational model that accommodates it.
+The migration is located at `database/migrations/xxxx_xx_xx_yyyyyyyy_create_food_table.php`
 
 Each user should be able to define their own list of food, including cost, name, and the user associated with each food:
 ```
