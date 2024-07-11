@@ -127,4 +127,35 @@ having the command in this form, automagically creates an empty migration for th
         });
     }
 ```
-We make the `elytica_project_id` nullable since we may not know if it exists.
+We make the `elytica_project_id` nullable since we may not know if it exists. Now, we have a place to store or update our Elytica project (a project can have multiple jobs associated with it).
+
+We can create a project once you sign up or, alternatively, whenever we optimize a profile. At this stage, the constraints are not associated with the profile yet, but we can add that later on. Let's first get a way to run an arbitrary job of a project.
+At this stage, create a directory in `app/` called `Service`, and create a new class called `ElyticaService` (`app/Services/ElyticaService.php`):
+```
+<?php
+namespace App\Services;
+
+class ElyticaService
+{
+
+}
+```
+With php, we can always inject any service into the constructor of another class, and it will instantiate it for us.
+We will move out logic to the service class, so we do not clutter our controllers or actions with the elytica compute logic. After this you will be able to reuse the alot of the ElyticaService code for other projects, an modify it according to your project needs.
+Lets create a helper function in our service to initialize our compute server (`app/Services/ElyticaService.php`):
+```
+  use Elytica\ComputeClient\ComputeService;
+```
+and within the class:
+```
+  public function initializeService(string $token): array {
+    if (!$token) {
+      return null;
+    }
+    // handle token decryption here if needed
+    // handle refresh token here before returning new ComputeService (not in this tutorial)
+    return new ComputeService($token);
+  }
+
+```
+Here we can use the token from `auth()->user()->elytica_service_token` - in the case you encrypted the token, you need to decrypt in before passing it to the `ComputeService` constructor.
