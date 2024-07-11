@@ -279,6 +279,10 @@ Now we can call the `createJob` function in out `QueueAction` class within out a
 ```
 When you press queue now, there should be a job created for the project, you can view the project and job from [here](https://compute.elytica.com). There is no script assigned to the job, so let's create a new file that will be uploaded for that job, create a new file in `app/Services/file.hlpl` with the following content:
 ```
+import json
+f = open('data.json')
+data = json.load(f)
+print(data)
 def main():
   print("Hello World")
   return  0
@@ -317,3 +321,28 @@ and create functions to upload the data and job script:
         return [true, "Success. You can now queue the job."];
     }
 ```
+In your `QueueAction` class, you can add:
+```
+            $service->uploadData($compute, $project_id, $job);
+```
+Re-queue the job, and have a look on the [Interpreter](https://compute.elytica.com) if your file is there.
+Finally we can add the `queueJob` function to the `ElyticaService` class to execute the script on Elytica.
+```
+  public function queueJob(ComputeService $computeService, int $project_id, $job) : array {
+    [$ok, $err] = $this->uploadData($computeService, $project_id, $job);
+    if ($ok) {
+      $computeService->queueJob($job->id);
+      return [$ok, ''];
+    }
+    return [false, $err];
+  }
+```
+and replace 
+```
+$service->uploadData($compute, $project_id, $job);
+```
+with 
+```
+$service->queueJob($compute, $project_id, $job);
+```
+since our `queueJob` function uploads the data.
