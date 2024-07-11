@@ -256,4 +256,6 @@ In your filament profile resource - `app/Filament/Resources/ProfileResource.php`
             ])
 
 ```
-Notice the elegance of the builder pattern with fluent interface used in the `table(...)` and `form(...)` functions' returns [more about builder pattern here](https://symfonycasts.com/screencast/design-patterns/builder)
+Notice the elegance of the builder pattern with a fluent interface used in the `table(...)` and `form(...)` functions' returns more about the builder pattern here. When you press queue on the profile, it should create a project on the Elytica service (no jobs or files are uploaded yet). Next, we want to create a job, and perhaps upload a file containing the model, followed by the data.
+
+In our `ElyticaService` class, we can add helper functions: one for creating a job, one for uploading the data and model, and later another for retrieving the results. As you can imagine, the model is available to the Elytica user since the computation is run from their account. If you want to hide the model, you should approach project and job creation differently. For instance, you could use your own account and pass the token from your .env file. This method contains the computation within your account but does so at the expense of your account's computational resources.
