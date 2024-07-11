@@ -107,3 +107,4 @@ from `form(...)` in `app/Filament/Resources/ProfileResource.php` and add the fol
         });
     }
 ```
+There is no need for us to see `elytica_job_id` in the form or table view of filament, but for now we will leave it in to do debugging.
