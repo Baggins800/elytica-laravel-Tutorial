@@ -206,3 +206,54 @@ Initially, this function retrieves all applications that the Elytica user has ac
     'elytica_app_id' => env('ELYTICA_APP_ID', 14),
 
 ```
+Let's test our `createOrUpdateProject` function as an action in `app/Filament/Actions` directory (create one if the directory does not exist), add the following action:
+```
+<?php
+namespace App\Filament\Actions;
+
+use App\Services\ElyticaService;
+use Filament\Tables\Actions\Action;
+use Filament\Actions\Concerns\CanCustomizeProcess;
+use Filament\Notifications\Notification;
+use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Model;
+
+class QueueAction extends Action
+{
+    use CanCustomizeProcess;
+
+    public static function getDefaultName(): ?string
+    {
+        return 'queue';
+    }
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->icon('heroicon-m-play');
+        $this->color('gray');
+        $this->action(function (): void {
+            $this->process(function (array $data, Model $record, Table $table) {
+            $service = new ElyticaService();
+            $compute = $service->initializeService(
+              auth()->user()->elytica_service_token
+            );
+            $project_id = $service->createOrUpdateProject($compute, auth()->user()->elytica_project_id);
+            Notification::make()
+                ->title("Queuing $record->name")
+                ->success()
+                ->send();
+            });
+        });
+    }
+}
+```
+In your filament profile resource - `app/Filament/Resources/ProfileResource.php` within your `table(...)` function, add your action to `$table`:
+```
+            ->actions([
+                Tables\Actions\EditAction::make(),
+                QueueAction::make(),
+            ])
+
+```
+Notice the elegance of the builder pattern with fluent interface used in the `table(...)` and `form(...)` functions' returns [more about builder pattern here](https://symfonycasts.com/screencast/design-patterns/builder)
