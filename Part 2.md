@@ -33,7 +33,7 @@ Let's populate the nutrition data using a seeder:
 ```
 php artisan make:seeder NutritionSeeder
 ```
-In database/seeders/NutritionSeeder.php, we can add some seed values for our system:
+In `database/seeders/NutritionSeeder.php`, we can add some seed values for our system:
 ```
         
         Illuminate\Support\Facades\DB::table('nutrition')->insert([
@@ -44,7 +44,7 @@ In database/seeders/NutritionSeeder.php, we can add some seed values for our sys
             ['name' => 'Fiber', 'unit' => 'g'],
         ]);
 ```
-And in database/seeders/DatabaseSeeder.php, call our seeder in the run() method:
+And in `database/seeders/DatabaseSeeder.php`, call our seeder in the `run()` method:
 
 ```
 $this->call([
