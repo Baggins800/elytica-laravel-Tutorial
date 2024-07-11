@@ -82,7 +82,7 @@ Forms\Components\TextInput::make('user_id')
     ->required()                                                                      
     ->numeric(),
 ```
-from the form() function in app/Filament/Resources/FoodResource.php. But now, there is no way of knowing who the user is that is storing the food. To fix this, change the Food model in app/Models/Food.php to:
+from the `form()` function in `app/Filament/Resources/FoodResource.php`. But now, there is no way of knowing who the user is that is storing the food. To fix this, change the Food model in `app/Models/Food.php` to:
 ```
     protected $guarded = ['user_id'];
     protected static function boot()
