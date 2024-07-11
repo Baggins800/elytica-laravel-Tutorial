@@ -98,7 +98,7 @@ from the `form()` function in `app/Filament/Resources/FoodResource.php`. But now
         });
     }
 ```
-This will make our food secure. There is still another problem: our food can have negative costs. We can add `->minValue(0.0)` to:
+This will make our food secure. There is still another problem - our food can have negative costs. We can add `->minValue(0.0)` to:
 ```
                   Forms\Components\TextInput::make('unit_cost')                                             
                      ->required()
