@@ -38,7 +38,7 @@ Install socialite and the elytica socialite package
 ```
 composer require laravel/socialite
 composer require elytica/elytica-socialite
-php artisan vendor:publish --provider=Elytica\Socialite\ElyticaServiceProvider
+php artisan vendor:publish --provider="Elytica\Socialite\ElyticaServiceProvider"
 php artisan migrate
 ```
 In `resources/views/welcome.blade.php` you can add:
