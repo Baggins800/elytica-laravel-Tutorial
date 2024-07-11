@@ -98,7 +98,7 @@ from the form() function in app/Filament/Resources/FoodResource.php. But now, th
         });
     }
 ```
-This will make our food secure. There is still another problem: our food can have negative costs. We can add ->minValue(0.0) to:
+This will make our food secure. There is still another problem: our food can have negative costs. We can add `->minValue(0.0)` to:
 ```
                   Forms\Components\TextInput::make('unit_cost')                                             
                      ->required()
@@ -165,7 +165,16 @@ We can add this model as a Filament resource as well:
 ```
 php artisan make:filament-resource FoodNutritionResource --generate
 ```
-As with the Food model, when a user creates a FoodNutrition, they should only be able to create one for the food they own. In the FoodNutrition model, add:
+For brevity in this tutorial, we will disable Laravel's mass assignment protection. Filament only saves valid data to models so the models can be unguarded safely. To unguard all Laravel models at once, add `Model::unguard()` to the `boot()` method of `app/Providers/AppServiceProvider.php`:
+```
+use Illuminate\Database\Eloquent\Model;
+ 
+public function boot(): void
+{
+    Model::unguard();
+}
+```
+As with the `Food` model, when a user creates a `FoodNutrition`, they should only be able to create one for the food they own. In the FoodNutrition model, add:
 
 ```
     protected static function boot()
@@ -186,7 +195,7 @@ As with the Food model, when a user creates a FoodNutrition, they should only be
     }
 ```
 
-We can also filter the options from the form() function in app/Filament/Resources/FoodNutritionResource.php using:
+We can also filter the options from the `form()` function in `app/Filament/Resources/FoodNutritionResource.php` using:
 ```
                     ->relationship('food', 'name', function (Builder $query) {
                         return $query->where('user_id', auth()->id());
