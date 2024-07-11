@@ -84,7 +84,7 @@ Route::middleware('guest')->group(function () {
             'elytica_service_id' => $user->getId(),
             'elytica_service_token' => $user->token,
             'elytica_service_expires_in' => $user->expiresIn,
-            'elytica_service_refreshToken' => $user->refreshToken,
+            'elytica_service_refresh_token' => $user->refreshToken,
            ]
        );
        Auth::login($authUser, true);
