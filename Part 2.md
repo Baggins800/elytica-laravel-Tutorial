@@ -75,7 +75,15 @@ As a user, we need a place to define our food. Here we can create a Filament res
 ```
 php artisan make:filament-resource FoodResource --generate
 ```
-
+For brevity in this tutorial, we will disable Laravel's mass assignment protection. Filament only saves valid data to models so the models can be unguarded safely. To unguard all Laravel models at once, add `Model::unguard()` to the `boot()` method of `app/Providers/AppServiceProvider.php`:
+```
+use Illuminate\Database\Eloquent\Model;
+ 
+public function boot(): void
+{
+    Model::unguard();
+}
+```
 If you open up the page and add a food, you might get a 500 error because users can add any id. To fix this, remove:
 ```
 Forms\Components\TextInput::make('user_id')
@@ -144,8 +152,9 @@ as
             $table->foreignIdFor(App\Models\Food::class);                            
             $table->foreignIdFor(App\Models\Nutrition::class);
             $table->double(column: 'value');     
-``` 
-We can now define the relationships and assignable attributes in the `FoodNutrition` model:
+```
+and run the migration `php artisan migrate`.
+We can now define the relationships and assignable attributes in the `FoodNutrition` model in `app/Models/FoodNutrition.php`:
 ```
     protected $fillable = ['food_id', 'nutrition_id', 'value'];
 
@@ -159,22 +168,14 @@ We can now define the relationships and assignable attributes in the `FoodNutrit
         return $this->belongsTo(Nutrition::class);
     }
 ```
-Remember to include `use Illuminate\Database\Eloquent\Relations\BelongsTo;`.
+Remember to include `use Illuminate\Database\Eloquent\Relations\BelongsTo;`. When you add the belongs to relation ships to the model, filament will be able to figure out that it should use the foreign keys to lookup the names of the related food and nutrition to display in a dropdown when creating or editing; this will become apparent once you generate the resources and attempt to add some data.
 
 We can add this model as a Filament resource as well:
 ```
-php artisan make:filament-resource FoodNutritionResource --generate
+php artisan make:filament-resource FoodNutrition --generate
 ```
-For brevity in this tutorial, we will disable Laravel's mass assignment protection. Filament only saves valid data to models so the models can be unguarded safely. To unguard all Laravel models at once, add `Model::unguard()` to the `boot()` method of `app/Providers/AppServiceProvider.php`:
-```
-use Illuminate\Database\Eloquent\Model;
- 
-public function boot(): void
-{
-    Model::unguard();
-}
-```
-As with the `Food` model, when a user creates a `FoodNutrition`, they should only be able to create one for the food they own. In the FoodNutrition model, add:
+Filament generate will use the migrated table's fields to generate a form schema for the resource.
+As with the `Food` model, when a user creates a `FoodNutrition`, they should only be able to create one for the food they own. In the FoodNutrition model (`app/Models/FoodNutrition.php`), add:
 
 ```
     protected static function boot()
@@ -202,7 +203,7 @@ We can also filter the options from the `form()` function in `app/Filament/Resou
                     })
 ```
 * Note: `->relationship('food'...` - food refers to the FoodNutrition model's `food()` belongs to function.
-This should work, but we want to see the unit of the selected nutrition. We can add a derived field in the Nutrition model using:
+This should work, but we want to see the unit of the selected nutrition. We can add a derived field in the Nutrition (`app/Models/Nutrition.php`) model using:
 
 ```
      protected $appends = ['name_and_unit'];
