@@ -6,52 +6,7 @@ We can start by installing the elytica compute client package:
 rm composer.lock
 composer require elytica/compute-client
 ```
-## Listening for webhooks
-We will also require a webhook client so [elytica](https://service.elytica.com) can come back with results
-```
-composer require spatie/laravel-webhook-client
-php artisan vendor:publish --provider="Spatie\WebhookClient\WebhookClientServiceProvider" --tag="webhook-client-config"
-```
-The webhook route should also be added to `routes/web.php`:
-```
-Route::webhooks('webhook');
-```
-and we need a job to process the incomming webhooks from elytica, in `config/webhook-client.php` as:
-```
-            'process_webhook_job' => \App\Jobs\ProcessElyticaWebhook::class,
-```
-and create the job with:
-```
-php artisan make:job ProcessElyticaWebhook
-```
-in `app/Jobs/ProcessElyticaWebhook.php` we can start with the logic when a job is completed:
-```
-      $webhookData = $this->webhookCall->payload;
-      $status = match($webhookData['status']) {
-        0 => "NONE",
-        1 => "QUEUED",
-        2 => "ACCEPTED",
-        3 => "PROCESSING",
-        4 => "COMPLETED",
-        5 => "STOPPED",
-        default => "NONE"
-      };
-      // do something with if $status is COMPLETED
-```
-Make sure that the webhook job is of type `Spatie\WebhookClient\Jobs\ProcessWebhookJob` in `app/Jobs/ProcessElyticaWebhook.php`:
-```
-use Filament\Notifications\Notification; // <--- see below
-use Spatie\WebhookClient\Jobs\ProcessWebhookJob;
-
-class ProcessElyticaWebhook extends ProcessWebhookJob
-{
-...
-```
-You can also add a notification for the user when the webhooks comes in - see [Filament Notifications](https://filamentphp.com/docs/3.x/notifications/installation).
-With Laravel you can configure the way your queue should be handled, a queue has the ability to listen for jobs, and using `php artisan queue:work`, the jobs can be executed.
-Options for the queue includes `database`, `sync`, `redis`, `beanstalk` and amazon `sqs`. For development is it fine to use `sync` or `database`, but in production it is recommended to use something faster that is in memory, such as `redis` or `beanstalk` - you can read more on this topic in [this](https://medium.com/@noor1yasser9/best-practices-and-strategies-for-using-queues-in-laravel-7c3035f93e84) post.
-
-## Creating a project with elytica
+## Creating a project with the elytica service
 There are multiple ways to utilize the project/job structure of elytica. You can create a new project for each run, or your can create a single project with multiple jobs, or the easiest to get started is to create a single project and job and reuse them. In this tutorial we will create a project the first time the user is logged in and configure each run as a different job on in the elytica service.<br>
 Before we begin, let’s discuss why using Elytica for computation is advantageous. Firstly, offloading computationally intensive and potentially long-running jobs from your web server helps prevent it from being overburdened. While Laravel jobs can handle this, they come with several challenges. Managing computational resources, memory, and CPU usage on a queue server can be difficult and time-consuming. Additionally, setting up and maintaining solvers and dependencies on your queue server can quickly become cumbersome. Using Elytica simplifies these tasks, allowing for efficient and effective computation management. You also get access to our modelling language :)<br>
 
@@ -257,7 +212,7 @@ In your filament profile resource - `app/Filament/Resources/ProfileResource.php`
 
 ```
 Notice the elegance of the builder pattern with a fluent interface used in the `table(...)` and `form(...)` functions' returns more about the builder pattern here. When you press queue on the profile, it should create a project on the Elytica service (no jobs or files are uploaded yet). Next, we want to create a job, and perhaps upload a file containing the model, followed by the data.
-
+## Creating a job with the elytica service
 In our `ElyticaService` class, we can add helper functions: one for creating a job, one for uploading the data and model, and later another for retrieving the results. As you can imagine, the model is available to the Elytica user since the computation is run from their account. If you want to hide the model, you should approach project and job creation differently. For instance, you could use your own account and pass the token from your .env file. This method contains the computation within your account but does so at the expense of your account's computational resources.
 
 Let's create a `createJob` function for our service:
@@ -346,3 +301,57 @@ with
 $service->queueJob($compute, $project_id, $job);
 ```
 since our `queueJob` function uploads the data.
+
+## Creating the profile constraints
+This is the final data piece we need, creating the minimum and maximum values of nutrition for each profile. Create a model that holds the foreign keys for a `Profile` and a `Nutrition` along with a minimum and maximum.
+```
+php artisan make:model NutritionProfile -m 
+```
+and add the following fields to `database/migrations/xxxx_xx_xx_xxxxxx_create_nutrition_profiles_table.php`:
+```
+            $table->foreignIdFor(Nutrition::class);
+            $table->foreignIdFor(Profile::class);
+            $table->decimal(column: 'minimum', total: 20, places: 6);
+            $table->decimal(column: 'maximum', total: 20, places: 6);
+```
+and run `php artisan migrate`.
+Within the `NutritionProfile` model (`app/Models/NutritionProfile`) add the relations and user check:
+```
+    public function nutrition(): BelongsTo
+    {
+        return $this->belongsTo(Nutrition::class);
+    }
+
+    public function profile(): BelongsTo
+    {
+        return $this->belongsTo(Profile::class);
+    }
+
+    protected static function boot()
+    {
+        parent::boot();
+        static::creating(function (NutritionProfile $nutritionProfile) {
+            $profile = Food::find($nutritionProfile->profile_id);
+            if ($profile->user_id !== auth()->id()) {
+                throw new HttpException(403, 'You do not have permission to assign this profile.');
+            }
+        });
+        static::updating(function (NutritionProfile $nutritionProfile) {
+            $profile = Food::find($nutritionProfile->profile_id);
+            if ($profile->user_id !== auth()->id()) {
+                throw new HttpException(403, 'You do not have permission to assign this profile.');
+            }
+        });
+    }
+```
+Once again we can generate the filament resource using:
+```
+php artisan make:filament-resource NutritionProfile --generate
+```
+We need to filter the profiles, such that a user can only see their own profiles. In the `form(...)` function of `app/Filament/Resources/NutritionProfileResource.php` we need to change the profile relation to filter on the auth user:
+```
+               Forms\Components\Select::make('profile_id')
+                    ->relationship('profile', 'name', function (Builder $query) {
+                        return $query->where('user_id', auth()->id());
+                    })
+```
