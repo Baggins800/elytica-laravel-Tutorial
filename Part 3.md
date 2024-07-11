@@ -57,14 +57,15 @@ Before we begin, let’s discuss why using Elytica for computation is advantageo
 
 Here is our approach - we will create the idea of an optimization run, this optimization run will use all the current available food and nutritional value, along with the constraints for that run and save the results.
 You can see this "run" as an optimization run for a specific person, e.g.
-| |Men|Women|
-|-|---|-----|
-|Energy (kcal)|2500 to 3200|2000 to 2500
-|Protein (g)|45 to 55|45 to 55
-|Carbohydrates (g)|250 to 300|230 to 270
-|Fat (g)|90 to 100|65 to 75
-|Saturates (g)|25 to 35|15 to 25
-|Salt (g)|3 to 8|3 to 8
+|                  | Men                | Women              |
+|------------------|--------------------|--------------------|
+| Energy (kcal)    | 2,500 to 3,000     | 1,800 to 2,400     |
+| Protein (g)      | 56                 | 46                 |
+| Carbohydrates (g)| 281 to 406         | 225 to 325         |
+| Fat (g)          | 70 to 105          | 55 to 80           |
+| Saturates (g)    | Less than 30       | Less than 20       |
+| Salt (g)         | Less than 2.3      | Less than 2.3      |
 
-This table is just an illustration, please do not use these values as factual.
+> **Note:** These values are based on general dietary guidelines and can vary based on individual health conditions, lifestyle factors, and nutritional requirements. For personalized dietary advice, consult a healthcare professional or dietitian.
 
+In our case we want to create a table to hold individual health conditions / profiles, lets call the model `Profile` so the relating table will be `profiles`. This table will ha a foreign key to the `users` table, a `name` and an `elytica_job_id`.
