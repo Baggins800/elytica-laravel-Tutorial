@@ -421,6 +421,7 @@ def main():
   elytica.init_model("diet_problem")
   status = elytica.run_model("diet_problem")      
   if status == "FEASIBLE" or status == "OPTIMAL":
+    solution = []
     F = elytica.get_model_set("diet_problem", "F")    
     for j in F:
       val = elytica.get_variable_value("diet_problem", f"x{j}")
