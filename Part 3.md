@@ -410,7 +410,7 @@ load_nutrition_max = lambda: {i['nutrition_id']:i['maximum'] for i in data["nutr
 load_nutrition_min = lambda: {i['nutrition_id']:i['minimum'] for i in data["nutrition_profiles"]}
 load_food_cost = lambda: {i['id']:i['unit_cost'] for i in data["food"]}
 
-load_food_nutrients = lambda: {f['id']:{ n['nutrition_id']: n['value'] for n in data['food_nutrition'] if n['food_id'] == f['id']} for f in data["food"]}
+load_food_nutrients = lambda: {n['id']:{ f['food_id']: f['value'] for f in data['food_nutrition'] if f['nutrition_id'] == n['id']} for n in data["nutrition"]}
 def main():
   #print(load_food())
   #print(load_nutrition())
