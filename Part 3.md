@@ -46,7 +46,7 @@ Once again you can remove:
                     ->numeric(),
 
 ```
-from `form(...)` in `app/Filament/Resources/ProfileResource.php` and add the folling in `app/Models/Profile.php`:
+from `form(...)` in `app/Filament/Resources/ProfileResource.php` and add the following in `app/Models/Profile.php`:
 ```
     protected $guarded = ['user_id'];
     protected static function boot()
@@ -85,7 +85,7 @@ having the command in this form, automagically creates an empty migration for th
 We make the `elytica_project_id` nullable since we may not know if it exists. Now, we have a place to store or update our Elytica project (a project can have multiple jobs associated with it).
 
 We can create a project once you sign up or, alternatively, whenever we optimize a profile. At this stage, the constraints are not associated with the profile yet, but we can add that later on. Let's first get a way to run an arbitrary job of a project.
-At this stage, create a directory in `app/` called `Service`, and create a new class called `ElyticaService` (`app/Services/ElyticaService.php`):
+At this stage, create a directory in `app/` called `Services`, and create a new class called `ElyticaService` (`app/Services/ElyticaService.php`):
 ```
 <?php
 namespace App\Services;
