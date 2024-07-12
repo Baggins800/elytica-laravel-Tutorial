@@ -333,13 +333,13 @@ Within the `NutritionProfile` model (`app/Models/NutritionProfile`) add the rela
     {
         parent::boot();
         static::creating(function (NutritionProfile $nutritionProfile) {
-            $profile = Food::find($nutritionProfile->profile_id);
+            $profile = Profile::find($nutritionProfile->profile_id);
             if ($profile->user_id !== auth()->id()) {
                 throw new HttpException(403, 'You do not have permission to assign this profile.');
             }
         });
         static::updating(function (NutritionProfile $nutritionProfile) {
-            $profile = Food::find($nutritionProfile->profile_id);
+            $profile = Profile::find($nutritionProfile->profile_id);
             if ($profile->user_id !== auth()->id()) {
                 throw new HttpException(403, 'You do not have permission to assign this profile.');
             }
